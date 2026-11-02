@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estudo de caso · Gestão para fisioterapeuta autônoma</title>
+<meta name="description" content="Como desenvolvi um sistema web de agenda, financeiro e metas para uma fisioterapeuta autônoma: regras de cálculo, arquitetura, segurança e resultado.">
+<meta property="og:title" content="Estudo de caso · Gestão para fisioterapeuta autônoma">
+<meta property="og:description" content="Regras de pagamento complexas transformadas em números confiáveis: no primeiro mês, o cálculo bateu com o controle manual da cliente.">
+<meta property="og:type" content="article">
+<meta name="author" content="Gabrielle Almeida Pimenta">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230E3B37'/%3E%3Cpath d='M32 14v36' stroke='%237FD8C6' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#0E2B29; --muted:#3E5A56; --line:#D5E2DF;
+  --brand:#0F7A70; --brand-ink:#0B5A53; --deep:#0E3B37; --deep-ink:#F2F5F3; --deep-muted:#CFE3DF;
+  --accent:#C2541F; --accent-soft:#FF9466; --mint:#7FD8C6; --tint:#E6F0EE;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1A19; --surface:#122725; --ink:#E8F1EF; --muted:#A9C2BE; --line:#24403C;
+    --brand:#5CC4B3; --brand-ink:#7FD8C6; --deep:#0E3B37; --deep-ink:#F2F5F3; --deep-muted:#CFE3DF;
+    --accent:#FF9466; --tint:#163330;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1A19; --surface:#122725; --ink:#E8F1EF; --muted:#A9C2BE; --line:#24403C;
+  --brand:#5CC4B3; --brand-ink:#7FD8C6; --accent:#FF9466; --tint:#163330;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.65 Inter,system-ui,sans-serif}
+a{color:var(--brand-ink);text-underline-offset:3px}
+a:hover{color:var(--brand)}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+header.hero{background:var(--deep);color:var(--deep-ink);padding:72px 0 64px}
+.eyebrow{font:600 13px/1 Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--deep-muted);margin:0 0 20px}
+.bar{width:72px;height:8px;border-radius:4px;background:var(--accent-soft);margin-bottom:28px}
+h1{font:700 clamp(32px,6vw,52px)/1.08 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 20px}
+.lead{font-size:clamp(18px,2.6vw,21px);line-height:1.55;color:var(--deep-muted);margin:0 0 28px;max-width:640px}
+.byline{font-size:15px;color:var(--deep-muted);display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.byline a{color:var(--deep-ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:10px;background:var(--accent-soft);color:#2A1206;font-weight:600;text-decoration:none}
+.btn:hover{color:#2A1206;filter:brightness(1.05)}
+main.wrap{padding-top:56px;padding-bottom:24px}
+section{margin:0 0 56px}
+h2{font:700 clamp(24px,4vw,32px)/1.15 'Space Grotesk',sans-serif;letter-spacing:-.01em;margin:0 0 16px}
+h3{font:600 19px/1.3 Inter,sans-serif;margin:32px 0 10px}
+p{margin:0 0 16px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin:0 0 8px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0 0 56px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.fact b{display:block;font:700 26px/1.1 'Space Grotesk',sans-serif;color:var(--brand-ink);margin-bottom:6px}
+.fact span{font-size:14px;color:var(--muted);line-height:1.4;display:block}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface);margin:0 0 20px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;background:var(--tint)}
+tr:last-child td{border-bottom:0}
+.views{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:0 0 16px}
+.view{border-radius:14px;padding:22px;background:var(--deep);color:var(--deep-ink)}
+.view h3{margin:0 0 8px;font:700 24px/1.1 'Space Grotesk',sans-serif}
+.view p{margin:0;color:var(--deep-muted);font-size:16px}
+.equation{background:var(--surface);border:1px solid var(--line);border-left:0;border-radius:14px;padding:18px 20px;font:500 18px/1.45 'Space Grotesk',sans-serif}
+figure{margin:24px 0}
+figure svg{width:100%;height:auto;display:block;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+figcaption{font-size:14px;color:var(--muted);margin-top:10px}
+.svg-ink{fill:var(--ink)} .svg-muted{fill:var(--muted)} .svg-line{stroke:var(--muted)} .svg-box{fill:none;stroke:var(--muted)} .svg-main{fill:var(--tint);stroke:var(--brand)}
+.lessons{display:grid;gap:12px}
+.lesson{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.lesson b{display:block;margin-bottom:4px}
+.stack{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0}
+.stack li{margin:0;padding:6px 12px;border-radius:999px;background:var(--tint);font-size:14px;font-weight:500}
+footer{border-top:1px solid var(--line);padding:28px 0 48px;font-size:14px;color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between}
+@media (max-width:520px){ body{font-size:16px} header.hero{padding:48px 0 44px} main.wrap{padding-top:40px} }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Estudo de caso · Desenvolvimento</p>
+    <div class="bar" aria-hidden="true"></div>
+    <h1>Sistema de gestão para uma fisioterapeuta autônoma</h1>
+    <p class="lead">Desenvolvi um sistema web de agenda, financeiro e metas para uma fisioterapeuta que atende num studio parceiro e em domicílio. O ponto central foi transformar regras de pagamento complexas em números confiáveis: no primeiro mês de uso, o cálculo do sistema bateu com o controle manual dela.</p>
+    <div class="byline">
+      <span>Por <a href="https://github.com/pimentagabrielle-TechChill">Gabrielle Almeida Pimenta</a></span>
+      <span>Outubro de 2026</span>
+      <a class="btn" href="https://github.com/pimentagabrielle-TechChill/gestao-consultorio-fisioterapia">Ver o código no GitHub</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="facts" role="list">
+    <div class="fact" role="listitem"><b>8 módulos</b><span>agenda, cadastro, recebimentos, metas, relatórios, carteira e mais</span></div>
+    <div class="fact" role="listitem"><b>7 regras</b><span>de pagamento diferentes, calculadas automaticamente</span></div>
+    <div class="fact" role="listitem"><b>R$ 0</b><span>por mês de infraestrutura, só com planos gratuitos</span></div>
+    <div class="fact" role="listitem"><b>Bateu</b><span>com o controle manual da cliente no primeiro mês</span></div>
+  </div>
+
+  <section>
+    <h2>Contexto</h2>
+    <p>A cliente é uma fisioterapeuta autônoma em São Paulo. Ela dá aulas de Pilates e Personal, faz liberação miofascial, drenagem e massagem, e atende em dois lugares: um studio parceiro e a casa dos pacientes.</p>
+    <p>O controle já era feito num app antigo em Google Apps Script, com os dados salvos como arquivos JSON numa pasta do Google Drive. Ele cuidava da agenda, mas não respondia às perguntas que mais importavam para ela:</p>
+    <ul>
+      <li>Quanto eu já recebi este mês?</li>
+      <li>Quanto ainda vai entrar, e quando?</li>
+      <li>O repasse que a clínica vai me pagar está certo?</li>
+      <li>Quanto paguei de sala?</li>
+    </ul>
+    <p>O objetivo foi responder a essas perguntas sem mudar a rotina dela: continuar lançando atendimentos pelo celular e ver os números fecharem sozinhos.</p>
+  </section>
+
+  <section>
+    <h2>O desafio</h2>
+    <p>A parte difícil não era a agenda, era o dinheiro. Levantando o processo com a cliente, mapeei sete situações de pagamento, cada uma com uma regra diferente:</p>
+    <div class="table">
+      <table>
+        <thead><tr><th>Atendimento</th><th>Quem paga</th><th>Quando entra</th></tr></thead>
+        <tbody>
+          <tr><td>Pilates e Personal (avulso ou aplicativo)</td><td>Clínica</td><td>No repasse do mês seguinte, valor cheio</td></tr>
+          <tr><td>Com nota fiscal e sala</td><td>Clínica</td><td>No repasse, 50% fixo</td></tr>
+          <tr><td>Com nota fiscal, sem sala</td><td>Clínica</td><td>No repasse, menos o percentual da nota</td></tr>
+          <tr><td>Sem nota, no studio</td><td>Paciente</td><td>Na data do pagamento; a sala é descontada no repasse seguinte</td></tr>
+          <tr><td>Sem nota, em domicílio</td><td>Paciente</td><td>Na data do pagamento</td></tr>
+          <tr><td>Sessão de pacote</td><td>Já paga</td><td>A sala da sessão é descontada no repasse</td></tr>
+          <tr><td>Pacote vendido</td><td>Paciente</td><td>Inteiro, na data do pagamento</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O repasse da clínica é pago no 5º dia útil do mês seguinte. Ou seja: o trabalho de outubro entra no caixa em parte em outubro (pacientes), em parte em novembro (clínica), e uma parte ainda pode estar pendente (quem não pagou).</p>
+    <p>A solução foi separar <strong>duas visões do mesmo mês</strong>:</p>
+    <div class="views">
+      <div class="view"><h3 style="color:var(--accent-soft)">Recebido</h3><p>Extrato de caixa. Cada valor conta no dia em que o dinheiro entra.</p></div>
+      <div class="view"><h3 style="color:var(--mint)">Produzido</h3><p>O que os atendimentos do mês rendem, contado pela data do atendimento.</p></div>
+    </div>
+    <p class="equation">Produzido = recebido + pacientes devendo + repasse que ainda vai cair</p>
+    <p>As duas visões precisam fechar. Essa equação virou o meu teste de aceitação.</p>
+  </section>
+
+  <section>
+    <h2>Decisões técnicas e arquitetura</h2>
+    <p>Escolhi uma arquitetura enxuta, que uma pessoa só consegue manter e que roda inteira em planos gratuitos.</p>
+    <figure>
+      <svg viewBox="0 0 760 320" role="img" aria-label="Arquitetura: o navegador fala com o banco pelo Netlify e, se falhar, direto; o GitHub publica o site e o GitHub Actions mantém o banco ativo" font-family="Inter, sans-serif" font-size="13">
+        <defs><marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-muted"/></marker></defs>
+        <text x="24" y="30" font-size="15" font-weight="600" class="svg-ink">A página fala com o banco pelo Netlify e, se falhar, direto</text>
+        <g fill="none" stroke-width="1.25" class="svg-line">
+          <path d="M204 116H280" marker-end="url(#seta)"/><path d="M460 116H536" marker-end="url(#seta)"/>
+          <path d="M114 72V56H636V72" stroke-dasharray="4 4" marker-end="url(#seta)"/>
+          <path d="M370 224V160" marker-end="url(#seta)"/><path d="M636 224V160" marker-end="url(#seta)"/>
+        </g>
+        <g font-size="11.5" class="svg-muted">
+          <text x="242" y="108" text-anchor="middle">abre o site</text><text x="498" y="108" text-anchor="middle">repasse</text>
+          <text x="375" y="50" text-anchor="middle">se o repasse falhar: direto</text>
+          <text x="378" y="196">publica</text><text x="644" y="196">ping diário</text>
+        </g>
+        <rect x="24" y="72" width="180" height="88" rx="8" class="svg-box" stroke-width="1.25"/>
+        <text x="36" y="96" font-weight="600" class="svg-ink">Navegador</text>
+        <text x="36" y="112" font-size="11.5" class="svg-muted">Página única do sistema</text><text x="36" y="128" font-size="11.5" class="svg-muted">PC ou celular</text>
+        <rect x="280" y="72" width="180" height="88" rx="8" class="svg-box" stroke-width="1.25"/>
+        <text x="292" y="96" font-weight="600" class="svg-ink">Netlify</text>
+        <text x="292" y="112" font-size="11.5" class="svg-muted">Hospeda o site</text><text x="292" y="128" font-size="11.5" class="svg-muted">Edge Function /supabase/*</text><text x="292" y="144" font-size="11.5" class="svg-muted">Prévia somente leitura</text>
+        <rect x="536" y="72" width="200" height="88" rx="8" class="svg-main" stroke-width="2"/>
+        <text x="548" y="96" font-weight="600" class="svg-ink">Supabase (PostgreSQL)</text>
+        <text x="548" y="112" font-size="11.5" class="svg-ink">Funções RPC com login</text><text x="548" y="128" font-size="11.5" class="svg-ink">Schema privado: documentos,</text><text x="548" y="144" font-size="11.5" class="svg-ink">usuários, sessões, lixeira</text>
+        <rect x="280" y="224" width="180" height="72" rx="8" class="svg-box" stroke-width="1.25"/>
+        <text x="292" y="248" font-weight="600" class="svg-ink">GitHub (código)</text>
+        <text x="292" y="264" font-size="11.5" class="svg-muted">Envio à main publica</text><text x="292" y="280" font-size="11.5" class="svg-muted">Build em Node.js</text>
+        <rect x="536" y="224" width="200" height="72" rx="8" class="svg-box" stroke-width="1.25"/>
+        <text x="548" y="248" font-weight="600" class="svg-ink">GitHub Actions</text>
+        <text x="548" y="264" font-size="11.5" class="svg-muted">Consulta diária ao banco</text><text x="548" y="280" font-size="11.5" class="svg-muted">Evita a pausa do plano grátis</text>
+      </svg>
+      <figcaption>O navegador faz todas as contas; o banco só guarda os dados e decide quem pode ler e gravar.</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Página única em HTML e JavaScript, sem framework.</strong> O app antigo já era uma página só, e reaproveitar a lógica reduziu o risco. Um script de build de poucas linhas junta os arquivos em um único <code>index.html</code>.</li>
+      <li><strong>Dados como documentos JSON no PostgreSQL.</strong> Cada mês de atendimentos, o cadastro, a configuração e a carteira são documentos numa coluna <code>jsonb</code>. Mantive o formato que o app antigo usava no Drive, o que deixou a migração direta.</li>
+      <li><strong>Acesso só por funções (RPC).</strong> As tabelas ficam num schema privado, sem acesso direto. A página chama funções que conferem a sessão e a permissão antes de agir.</li>
+      <li><strong>Banco na região São Paulo.</strong> Menor latência e dados de saúde dos pacientes guardados no Brasil.</li>
+      <li><strong>Repasse pelo próprio site.</strong> Uma Edge Function do Netlify encaminha as chamadas ao banco, para que bloqueadores e filtros de rede não derrubem o sistema. Se falhar, a página chama o banco direto.</li>
+      <li><strong>Prévia por pull request.</strong> Cada mudança ganha um endereço de teste, ligado ao mesmo banco mas em modo somente leitura.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Como construí</h2>
+    <h3>Regras de cálculo</h3>
+    <p>Cada atendimento recebe uma origem (clínica, paciente ou pacote). A partir dela, três funções resolvem quase tudo: quanto o atendimento rende para a profissional, quanto entra no repasse da clínica e quanto de sala é descontado. Com essas peças, o sistema monta o extrato, a produção do mês e o repasse em formação.</p>
+    <p>O 5º dia útil é calculado descontando fins de semana e feriados nacionais, inclusive os móveis (Carnaval, Sexta-feira Santa e Corpus Christi), a partir da data da Páscoa de cada ano.</p>
+    <p>Alguns detalhes só apareceram conversando com a cliente:</p>
+    <ul>
+      <li>Atendimento com nota e sala não soma os percentuais: vira 50% fixo.</li>
+      <li>Falta sem aviso prévio conta como aula dada; desmarcação com antecedência dá direito a repor.</li>
+      <li>No pacote, a sala é descontada sessão a sessão, sobre o valor do pacote dividido pelo número de sessões.</li>
+    </ul>
+    <h3>Telas</h3>
+    <p>Início, Agenda, Cadastro, Recebimentos, Metas, Relatórios, Carteira e Configurações, com menu lateral no computador e barra inferior no celular. A tela Início junta o que ela precisa ver ao abrir o sistema: os atendimentos do dia, os que ficaram sem confirmação, a meta do mês nas duas visões e o próximo repasse.</p>
+    <h3>Segurança</h3>
+    <ul>
+      <li>Senhas com bcrypt e troca obrigatória no primeiro acesso.</li>
+      <li>Bloqueio de 15 minutos após 5 tentativas erradas.</li>
+      <li>Sessões com expiração; trocar a senha encerra as outras sessões.</li>
+      <li>Administrador ou usuário com permissão por módulo: sem acesso, visualizar ou editar.</li>
+      <li>Nada é apagado de verdade: o que sai vai para uma lixeira no banco.</li>
+    </ul>
+    <h3>Migração</h3>
+    <ol>
+      <li>Exportei os arquivos JSON do app antigo.</li>
+      <li>Um script em Node.js gera o SQL de importação a partir deles.</li>
+      <li>Antes de substituir qualquer documento, o SQL guarda uma cópia na lixeira.</li>
+      <li>O arquivo gerado tem dados de pacientes, então fica fora do repositório.</li>
+    </ol>
+    <p>A virada foi feita sem interromper os atendimentos, e o app antigo ficou como backup.</p>
+  </section>
+
+  <section>
+    <h2>Problemas no caminho</h2>
+    <div class="table">
+      <table>
+        <thead><tr><th>Problema</th><th>O que fiz</th></tr></thead>
+        <tbody>
+          <tr><td>Poucos dias depois da virada, o login parou: o plano grátis do banco pausa projetos com pouco uso</td><td>Reativei o projeto e criei uma tarefa no GitHub Actions que consulta o banco todo dia e avisa por e-mail se ele não responder</td></tr>
+          <tr><td>O repasse configurado no Netlify não era aplicado e devolvia erro 404</td><td>Troquei a regra de redirecionamento por uma Edge Function; o fallback para a chamada direta manteve o sistema no ar enquanto isso</td></tr>
+          <tr><td>Atendimentos de dias passados ficavam como "Agendado" e distorciam a meta</td><td>Criei um painel "Confirmar atendimentos" na tela inicial</td></tr>
+          <tr><td>A tela de finanças pessoais travava o navegador ao carregar os meses, um defeito herdado do app antigo</td><td>Corrigi o carregamento</td></tr>
+          <tr><td>As senhas antigas não podiam ser exportadas</td><td>Criei usuários novos com senha provisória e troca obrigatória no primeiro acesso</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Resultado</h2>
+    <p>Testei as regras com os dados reais do primeiro mês. A equação fechou: o produzido foi igual ao recebido mais o que os pacientes deviam mais o repasse previsto. O total de sala calculado também bateu com o controle manual que a cliente fazia à parte.</p>
+    <p>Hoje ela vê, na tela inicial, quanto recebeu, quanto ainda vai entrar e quanto falta para a meta, e confere o repasse da clínica antes de ele cair na conta.</p>
+  </section>
+
+  <section>
+    <h2>O que aprendi</h2>
+    <div class="lessons">
+      <div class="lesson"><b>O problema raramente está onde parece.</b>O pedido falava de agenda, cadastro e financeiro; o maior valor estava no cálculo do dinheiro.</div>
+      <div class="lesson"><b>Regra de negócio se descobre conversando.</b>Os detalhes que mais pesaram (50% fixo, sala por sessão de pacote) não estavam escritos em lugar nenhum.</div>
+      <div class="lesson"><b>Um teste que o cliente entende vale mais.</b>"O sistema bate com a sua planilha" convenceu mais do que qualquer explicação técnica.</div>
+      <div class="lesson"><b>Grátis não é sem manutenção.</b>Infraestrutura gratuita precisa de monitoramento, ou o cliente descobre o problema antes de você.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Stack</h2>
+    <ul class="stack">
+      <li>JavaScript</li><li>HTML e CSS</li><li>Node.js</li><li>PostgreSQL</li><li>Supabase</li><li>pgcrypto</li><li>Netlify</li><li>Edge Functions</li><li>GitHub Actions</li>
+    </ul>
+    <p><a class="btn" href="https://github.com/pimentagabrielle-TechChill/gestao-consultorio-fisioterapia">Ver o código no GitHub</a></p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Gabrielle Almeida Pimenta. Nome e dados da cliente omitidos.</span>
+    <a href="https://github.com/pimentagabrielle-TechChill">github.com/pimentagabrielle-TechChill</a>
+  </div>
+</footer>
+</body>
+</html>

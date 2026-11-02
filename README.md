@@ -4,6 +4,8 @@ Sistema web de agenda, cadastro, recebimentos, metas, relatórios e finanças pe
 
 > Repositório de portfólio. O código é o do sistema em produção, com o nome da cliente, os endereços e as chaves removidos.
 
+**[Leia o estudo de caso completo](https://pimentagabrielle-techchill.github.io/gestao-consultorio-fisioterapia/)**
+
 ## O problema
 
 Na fisioterapia autônoma, cada atendimento segue uma regra de pagamento diferente. Às vezes paga a clínica, às vezes o paciente, e pode haver aluguel de sala, nota fiscal, aplicativo de check-in (TotalPass, Wellhub) ou pacote pago antecipadamente. O repasse da clínica só cai no 5º dia útil do mês seguinte.
