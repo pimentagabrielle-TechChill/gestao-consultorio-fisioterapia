@@ -83,6 +83,9 @@ figcaption{font-size:14px;color:var(--muted);margin-top:10px}
 .stack li{margin:0;padding:6px 12px;border-radius:999px;background:var(--tint);font-size:14px;font-weight:500}
 .ilustra{margin:24px 0}
 .ilustra img{width:100%;height:auto;display:block;border-radius:14px;border:1px solid var(--line)}
+.ilustra a.amplia{display:block}
+.toque{display:none}
+@media (max-width:700px){.toque{display:block}}
 footer{border-top:1px solid var(--line);padding:28px 0 48px;font-size:14px;color:var(--muted)}
 footer .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between}
 @media (max-width:520px){ body{font-size:16px} header.hero{padding:48px 0 44px} main.wrap{padding-top:40px} }
@@ -142,15 +145,18 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-bet
       </table>
     </div>
     <figure class="ilustra">
-      <img src="img/fluxo.png" width="2400" height="1734" loading="lazy" alt="Fluxo de decisão: se é sessão de pacote, já foi pago e a sala é descontada no repasse. Se não, quem paga? Clínica: Pilates, Personal ou aplicativo entra com valor cheio no repasse; com nota, 50% fixo se usou sala ou valor menos a nota se não usou. Paciente: no studio, valor cheio na hora com a sala descontada no repasse seguinte; em domicílio, valor cheio na hora.">
+      <a href="img/fluxo.png" class="amplia"><img src="img/fluxo.png" width="2400" height="1734" loading="lazy" alt="Fluxo de decisão: se é sessão de pacote, já foi pago e a sala é descontada no repasse. Se não, quem paga? Clínica: Pilates, Personal ou aplicativo entra com valor cheio no repasse; com nota, 50% fixo se usou sala ou valor menos a nota se não usou. Paciente: no studio, valor cheio na hora com a sala descontada no repasse seguinte; em domicílio, valor cheio na hora."></a>
+      <figcaption class="toque">Toque na imagem para ampliar.</figcaption>
     </figure>
     <p>O repasse da clínica é pago no 5º dia útil do mês seguinte. Ou seja: o trabalho de outubro entra no caixa em parte em outubro (pacientes), em parte em novembro (clínica), e uma parte ainda pode estar pendente (quem não pagou).</p>
     <figure class="ilustra">
-      <img src="img/linha.png" width="2400" height="1488" loading="lazy" alt="Linha do tempo: o paciente que paga na hora gera entrada no mesmo dia; o que paga depois fica em a receber e pode passar do mês; os atendimentos pagos pela clínica viram um único repasse no 5º dia útil do mês seguinte, já sem a sala.">
+      <a href="img/linha.png" class="amplia"><img src="img/linha.png" width="2400" height="1488" loading="lazy" alt="Linha do tempo: o paciente que paga na hora gera entrada no mesmo dia; o que paga depois fica em a receber e pode passar do mês; os atendimentos pagos pela clínica viram um único repasse no 5º dia útil do mês seguinte, já sem a sala."></a>
+      <figcaption class="toque">Toque na imagem para ampliar.</figcaption>
     </figure>
     <p>A solução foi separar <strong>duas visões do mesmo mês</strong>: o <strong>recebido</strong>, que é o extrato de caixa, e o <strong>produzido</strong>, que conta o que os atendimentos rendem pela data do atendimento.</p>
     <figure class="ilustra">
-      <img src="img/equacao.png" width="2400" height="1598" loading="lazy" alt="Produzido é igual a recebido dos pacientes, mais pacientes devendo, mais o repasse da clínica que cai no mês seguinte.">
+      <a href="img/equacao.png" class="amplia"><img src="img/equacao.png" width="2400" height="1598" loading="lazy" alt="Produzido é igual a recebido dos pacientes, mais pacientes devendo, mais o repasse da clínica que cai no mês seguinte."></a>
+      <figcaption class="toque">Toque na imagem para ampliar.</figcaption>
     </figure>
     <p>As duas visões precisam fechar. Essa equação virou o meu teste de aceitação.</p>
   </section>
