@@ -8,6 +8,12 @@
 <meta property="og:title" content="Estudo de caso · Gestão para fisioterapeuta autônoma">
 <meta property="og:description" content="Regras de pagamento complexas transformadas em números confiáveis: no primeiro mês, o cálculo bateu com o controle manual da cliente.">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://pimentagabrielle-techchill.github.io/gestao-consultorio-fisioterapia/">
+<meta property="og:image" content="https://pimentagabrielle-techchill.github.io/gestao-consultorio-fisioterapia/img/capa.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:image:alt" content="Estudo de caso: sistema de gestão para uma fisioterapeuta autônoma">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="author" content="Gabrielle Almeida Pimenta">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,6 +81,8 @@ figcaption{font-size:14px;color:var(--muted);margin-top:10px}
 .lesson b{display:block;margin-bottom:4px}
 .stack{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0}
 .stack li{margin:0;padding:6px 12px;border-radius:999px;background:var(--tint);font-size:14px;font-weight:500}
+.ilustra{margin:24px 0}
+.ilustra img{width:100%;height:auto;display:block;border-radius:14px;border:1px solid var(--line)}
 footer{border-top:1px solid var(--line);padding:28px 0 48px;font-size:14px;color:var(--muted)}
 footer .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between}
 @media (max-width:520px){ body{font-size:16px} header.hero{padding:48px 0 44px} main.wrap{padding-top:40px} }
@@ -133,13 +141,17 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-bet
         </tbody>
       </table>
     </div>
+    <figure class="ilustra">
+      <img src="img/fluxo.png" width="2400" height="1734" loading="lazy" alt="Fluxo de decisão: se é sessão de pacote, já foi pago e a sala é descontada no repasse. Se não, quem paga? Clínica: Pilates, Personal ou aplicativo entra com valor cheio no repasse; com nota, 50% fixo se usou sala ou valor menos a nota se não usou. Paciente: no studio, valor cheio na hora com a sala descontada no repasse seguinte; em domicílio, valor cheio na hora.">
+    </figure>
     <p>O repasse da clínica é pago no 5º dia útil do mês seguinte. Ou seja: o trabalho de outubro entra no caixa em parte em outubro (pacientes), em parte em novembro (clínica), e uma parte ainda pode estar pendente (quem não pagou).</p>
-    <p>A solução foi separar <strong>duas visões do mesmo mês</strong>:</p>
-    <div class="views">
-      <div class="view"><h3 style="color:var(--accent-soft)">Recebido</h3><p>Extrato de caixa. Cada valor conta no dia em que o dinheiro entra.</p></div>
-      <div class="view"><h3 style="color:var(--mint)">Produzido</h3><p>O que os atendimentos do mês rendem, contado pela data do atendimento.</p></div>
-    </div>
-    <p class="equation">Produzido = recebido + pacientes devendo + repasse que ainda vai cair</p>
+    <figure class="ilustra">
+      <img src="img/linha.png" width="2400" height="1488" loading="lazy" alt="Linha do tempo: o paciente que paga na hora gera entrada no mesmo dia; o que paga depois fica em a receber e pode passar do mês; os atendimentos pagos pela clínica viram um único repasse no 5º dia útil do mês seguinte, já sem a sala.">
+    </figure>
+    <p>A solução foi separar <strong>duas visões do mesmo mês</strong>: o <strong>recebido</strong>, que é o extrato de caixa, e o <strong>produzido</strong>, que conta o que os atendimentos rendem pela data do atendimento.</p>
+    <figure class="ilustra">
+      <img src="img/equacao.png" width="2400" height="1598" loading="lazy" alt="Produzido é igual a recebido dos pacientes, mais pacientes devendo, mais o repasse da clínica que cai no mês seguinte.">
+    </figure>
     <p>As duas visões precisam fechar. Essa equação virou o meu teste de aceitação.</p>
   </section>
 
