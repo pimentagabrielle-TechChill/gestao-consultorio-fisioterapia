@@ -1,0 +1,25 @@
+# Configuração do Netlify (vale mais que o que estiver no painel).
+# Gera dist/index.html a partir de src/ e publica a pasta dist.
+[build]
+  command = "node ferramentas/build.js"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# O repasse /supabase/* para o banco é feito pela função netlify/edge-functions/supabase.js.
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "same-origin"
+    X-Content-Type-Options = "nosniff"
+
+# Prévias (links deploy-preview-N e branches): mesmo banco, mas somente leitura.
+# Nada do que se faz na prévia é gravado. Só o site oficial (main) grava.
+[context.deploy-preview]
+  command = "node ferramentas/build.js --somente-leitura"
+
+[context.branch-deploy]
+  command = "node ferramentas/build.js --somente-leitura"

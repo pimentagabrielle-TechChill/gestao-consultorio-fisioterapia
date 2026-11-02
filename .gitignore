@@ -1,0 +1,5 @@
+dist/
+supabase/02_dados.sql
+*.env
+.env*
+node_modules/

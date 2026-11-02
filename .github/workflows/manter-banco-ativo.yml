@@ -1,0 +1,47 @@
+# Mantém o banco do Supabase acordado.
+# O plano grátis pausa projetos sem uso; esta tarefa faz uma consulta
+# simples todo dia. Se o banco não responder, a execução falha e o
+# GitHub manda um e-mail avisando.
+#
+# Configure em Settings → Secrets and variables → Actions:
+#   SUPABASE_URL  endereço do projeto (https://xxxx.supabase.co)
+#   SUPABASE_KEY  chave pública (publishable/anon)
+# Sem os dois, a tarefa é pulada.
+name: Manter banco ativo
+
+on:
+  schedule:
+    - cron: "7 12 * * *"   # todo dia às 09:07 (horário de Brasília)
+  workflow_dispatch:        # permite rodar na mão pela aba Actions
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+    steps:
+      - name: Consultar o banco
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
+            echo "Secrets SUPABASE_URL e SUPABASE_KEY não configurados; nada a fazer."
+            exit 0
+          fi
+          for tentativa in 1 2 3; do
+            resposta=$(curl -sS -m 30 -X POST \
+              "${SUPABASE_URL%/}/rest/v1/rpc/me" \
+              -H "apikey: $SUPABASE_KEY" \
+              -H "Content-Type: application/json" \
+              -d '{"p_token":"00000000-0000-0000-0000-000000000000"}' || true)
+            if echo "$resposta" | grep -q "SESSAO_EXPIRADA"; then
+              echo "Banco ativo."
+              exit 0
+            fi
+            echo "Sem resposta esperada (tentativa $tentativa)."
+            sleep 20
+          done
+          echo "::error::O banco não respondeu. Verifique se o projeto foi pausado no Supabase (supabase.com/dashboard → Resume project)."
+          exit 1
